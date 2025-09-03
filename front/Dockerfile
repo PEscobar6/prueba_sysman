@@ -23,7 +23,7 @@ COPY .postcssrc.json ./
 RUN npm run build
 
 # Etapa 2: Servir la aplicación con Nginx
-FROM nginx:1.27-alpine
+FROM nginx:alpine
 
 # Crear usuario no root para mayor seguridad
 RUN addgroup -g 1001 -S nodejs && \

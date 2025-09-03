@@ -11,6 +11,9 @@ import java.util.List;
 @Repository
 public interface MaterialRepository extends JpaRepository<Material, Long> {
     
+    @Query("SELECT m FROM Material m ORDER BY m.id DESC")
+    List<Material> findAllOrderedById();
+    
     List<Material> findByTipo(String tipo);
     
     List<Material> findByFechaCompra(LocalDate fechaCompra);

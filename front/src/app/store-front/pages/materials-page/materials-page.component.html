@@ -1,1 +1,582 @@
-<p>materials-page works!</p>,
+<div class="container mx-auto p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold">Gestión de Materiales</h1>
+      <p class="text-base-content/70 mt-2">Administra y consulta todos los materiales del sistema</p>
+    </div>
+    <button class="btn btn-primary gap-2" onclick="nuevo_material_modal.showModal()" (click)="openCreateModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Nuevo Material
+    </button>
+  </div>
+
+  <!-- Filtros de búsqueda -->
+  <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body">
+      <h2 class="card-title mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.586V4z" />
+        </svg>
+        Filtros de búsqueda
+      </h2>
+
+      <!-- Barra de búsqueda -->
+      <div class="form-control w-full mb-4">
+        <label class="label">
+          <span class="label-text">Buscar</span>
+        </label>
+        <input
+          type="text"
+          placeholder="Buscar por nombre o descripción..."
+          class="input input-bordered w-full"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()">
+      </div>
+
+      <!-- Filtros en fila -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Tipo</span>
+          </label>
+          <select
+            class="select select-bordered"
+            [(ngModel)]="selectedTipo"
+            (change)="onFilterChange()">
+            <option value="">Todos los tipos</option>
+            <option *ngFor="let tipo of tipos" [value]="tipo">{{ tipo }}</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Estado</span>
+          </label>
+          <select
+            class="select select-bordered"
+            [(ngModel)]="selectedEstado"
+            (change)="onFilterChange()">
+            <option value="">Todos los estados</option>
+            <option *ngFor="let estado of estados" [value]="estado">{{ estado }}</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Fecha de compra</span>
+          </label>
+          <input
+            type="date"
+            class="input input-bordered"
+            [(ngModel)]="selectedFechaCompra"
+            (change)="onFilterChange()">
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Acciones</span>
+          </label>
+          <button class="btn btn-outline" (click)="clearFilters()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado de carga -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <span class="loading loading-spinner loading-lg"></span>
+    <span class="ml-4 text-lg">Cargando materiales...</span>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error && !loading" class="alert alert-error mb-6">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <div>
+      <h3 class="font-bold">Error!</h3>
+      <div class="text-xs">{{ error }}</div>
+    </div>
+    <div>
+      <button class="btn btn-sm btn-outline" (click)="loadMateriales()">
+        Reintentar
+      </button>
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div *ngIf="!loading && !error">
+    <!-- Header de resultados -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="stats shadow">
+        <div class="stat">
+          <div class="stat-title">Total de materiales</div>
+          <div class="stat-value text-2xl">{{ filteredMateriales.length }}</div>
+          <div class="stat-desc">de {{ materiales.length }} en total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de materiales -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="filteredMateriales.length > 0">
+      <app-material-card
+        *ngFor="let material of filteredMateriales; trackBy: trackByMaterialId"
+        [material]="material"
+        (edit)="onEditMaterial($event)"
+        (delete)="onDeleteMaterial($event)">
+      </app-material-card>
+    </div>
+
+    <!-- Mensaje cuando no hay resultados -->
+    <div *ngIf="filteredMateriales.length === 0" class="hero min-h-[400px]">
+      <div class="hero-content text-center">
+        <div class="max-w-md">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-24 w-24 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          </svg>
+          <h1 class="text-2xl font-bold">No hay materiales</h1>
+          <p class="py-4 text-base-content/70">
+            No se encontraron materiales que coincidan con los filtros aplicados.
+          </p>
+          <div class="space-x-2">
+            <button class="btn btn-primary" (click)="clearFilters()">
+              Limpiar filtros
+            </button>
+            <button class="btn btn-outline" routerLink="/materials/new">
+              Crear nuevo material
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para crear nuevo material -->
+<dialog id="nuevo_material_modal" class="modal">
+  <div class="modal-box w-11/12 max-w-3xl">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="font-bold text-xl">Crear Nuevo Material</h3>
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost">✕</button>
+      </form>
+    </div>
+
+    <!-- Formulario -->
+    <form class="space-y-6" (ngSubmit)="onCreateMaterial()" #materialForm="ngForm">
+
+      <!-- Nombre (ancho completo) -->
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text font-medium">Nombre <span class="text-error">*</span></span>
+        </label>
+        <input
+          type="text"
+          placeholder="Ingrese el nombre del material"
+          class="input input-bordered w-full focus:input-primary"
+          [(ngModel)]="newMaterial.nombre"
+          name="nombre"
+          required
+          maxlength="100"
+          #nombreInput="ngModel">
+        <div *ngIf="nombreInput.invalid && nombreInput.touched" class="label">
+          <span class="label-text-alt text-error">
+            <span *ngIf="nombreInput.errors?.['required']">El nombre es obligatorio</span>
+            <span *ngIf="nombreInput.errors?.['maxlength']">El nombre no puede exceder 100 caracteres</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Descripción (ancho completo) -->
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text font-medium">Descripción</span>
+        </label>
+        <textarea
+          class="textarea textarea-bordered w-full h-24 focus:textarea-primary resize-none"
+          placeholder="Descripción detallada del material (opcional)"
+          [(ngModel)]="newMaterial.descripcion"
+          name="descripcion"
+          rows="3"></textarea>
+      </div>
+
+      <!-- Fila 1: Tipo y Precio -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Tipo <span class="text-error">*</span></span>
+          </label>
+          <input
+            type="text"
+            placeholder="Ej: Herramienta, Material, Equipo"
+            class="input input-bordered focus:input-primary"
+            [(ngModel)]="newMaterial.tipo"
+            name="tipo"
+            required
+            maxlength="50"
+            #tipoInput="ngModel">
+          <div *ngIf="tipoInput.invalid && tipoInput.touched" class="label">
+            <span class="label-text-alt text-error">
+              <span *ngIf="tipoInput.errors?.['required']">El tipo es obligatorio</span>
+              <span *ngIf="tipoInput.errors?.['maxlength']">El tipo no puede exceder 50 caracteres</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Precio <span class="text-error">*</span></span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60">$</span>
+            <input
+              type="number"
+              placeholder="0.00"
+              class="input input-bordered pl-8 focus:input-primary"
+              [(ngModel)]="newMaterial.precio"
+              name="precio"
+              required
+              min="0.01"
+              step="0.01"
+              #precioInput="ngModel">
+          </div>
+          <div *ngIf="precioInput.invalid && precioInput.touched" class="label">
+            <span class="label-text-alt text-error">
+              <span *ngIf="precioInput.errors?.['required']">El precio es obligatorio</span>
+              <span *ngIf="precioInput.errors?.['min']">El precio debe ser mayor a 0</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fila 2: Fecha de compra y Estado -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Fecha de compra <span class="text-error">*</span></span>
+          </label>
+          <input
+            type="date"
+            class="input input-bordered focus:input-primary"
+            [(ngModel)]="newMaterial.fechaCompra"
+            name="fechaCompra"
+            required
+            [max]="getMaxDate()"
+            #fechaCompraInput="ngModel">
+          <div *ngIf="fechaCompraInput.invalid && fechaCompraInput.touched" class="label">
+            <span class="label-text-alt text-error">
+              <span *ngIf="fechaCompraInput.errors?.['required']">La fecha de compra es obligatoria</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Estado <span class="text-error">*</span></span>
+          </label>
+          <select
+            class="select select-bordered focus:select-primary"
+            [(ngModel)]="newMaterial.estado"
+            name="estado"
+            required
+            #estadoInput="ngModel">
+            <option value="" disabled>Seleccionar estado</option>
+            <option *ngFor="let estado of estados" [value]="estado">{{ estado }}</option>
+          </select>
+          <div *ngIf="estadoInput.invalid && estadoInput.touched" class="label">
+            <span class="label-text-alt text-error">
+              <span *ngIf="estadoInput.errors?.['required']">El estado es obligatorio</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ciudad (ancho completo) -->
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text font-medium">Ciudad <span class="text-error">*</span></span>
+        </label>
+        <select
+          class="select select-bordered focus:select-primary"
+          [(ngModel)]="selectedCiudadCodigo"
+          name="ciudad"
+          required
+          #ciudadInput="ngModel">
+          <option value="" disabled>Seleccionar ciudad</option>
+          <option *ngFor="let ciudad of ciudades" [value]="ciudad.codigo">
+            {{ ciudad.nombre }} - {{ ciudad.departamento.nombre }}
+          </option>
+        </select>
+        <div *ngIf="ciudadInput.invalid && ciudadInput.touched" class="label">
+          <span class="label-text-alt text-error">
+            <span *ngIf="ciudadInput.errors?.['required']">La ciudad es obligatoria</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Loading y error -->
+      <div *ngIf="creatingMaterial" class="flex items-center justify-center py-4">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <span class="ml-3 text-lg">Creando material...</span>
+      </div>
+
+      <div *ngIf="createError" class="alert alert-error">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>{{ createError }}</span>
+      </div>
+
+      <!-- Botones -->
+      <div class="modal-action pt-6 border-t border-base-200">
+        <div class="flex gap-3 w-full justify-end">
+          <form method="dialog">
+            <button type="button" class="btn btn-outline btn-lg" [disabled]="creatingMaterial">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Cancelar
+            </button>
+          </form>
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg"
+            [disabled]="materialForm.invalid || creatingMaterial">
+            <span *ngIf="creatingMaterial" class="loading loading-spinner loading-sm mr-2"></span>
+            <svg *ngIf="!creatingMaterial" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            {{ creatingMaterial ? 'Creando...' : 'Crear Material' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+<!-- Modal para editar material -->
+<dialog id="edit_material_modal" class="modal">
+  <div class="modal-box w-11/12 max-w-3xl">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="font-bold text-xl">Editar Material</h3>
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost" (click)="closeEditModal()">✕</button>
+      </form>
+    </div>
+
+    <!-- Formulario de edición -->
+    <form class="space-y-6" (ngSubmit)="onUpdateMaterial()" #editMaterialForm="ngForm">
+
+      <!-- Nombre (ancho completo) -->
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text font-medium">Nombre <span class="text-error">*</span></span>
+        </label>
+        <input
+          type="text"
+          placeholder="Ingrese el nombre del material"
+          class="input input-bordered w-full focus:input-primary"
+          [(ngModel)]="editMaterial.nombre"
+          name="editNombre"
+          required
+          maxlength="100"
+          #editNombreInput="ngModel">
+        <div *ngIf="editNombreInput.invalid && editNombreInput.touched" class="label">
+          <span class="label-text-alt text-error">
+            <span *ngIf="editNombreInput.errors?.['required']">El nombre es obligatorio</span>
+            <span *ngIf="editNombreInput.errors?.['maxlength']">El nombre no puede exceder 100 caracteres</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Descripción (ancho completo) -->
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text font-medium">Descripción</span>
+        </label>
+        <textarea
+          class="textarea textarea-bordered w-full h-24 focus:textarea-primary resize-none"
+          placeholder="Descripción detallada del material (opcional)"
+          [(ngModel)]="editMaterial.descripcion"
+          name="editDescripcion"
+          rows="3"></textarea>
+      </div>
+
+      <!-- Fila 1: Tipo y Precio -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Tipo <span class="text-error">*</span></span>
+          </label>
+          <input
+            type="text"
+            placeholder="Ej: Herramienta, Material, Equipo"
+            class="input input-bordered focus:input-primary"
+            [(ngModel)]="editMaterial.tipo"
+            name="editTipo"
+            required
+            maxlength="50"
+            #editTipoInput="ngModel">
+          <div *ngIf="editTipoInput.invalid && editTipoInput.touched" class="label">
+            <span class="label-text-alt text-error">
+              <span *ngIf="editTipoInput.errors?.['required']">El tipo es obligatorio</span>
+              <span *ngIf="editTipoInput.errors?.['maxlength']">El tipo no puede exceder 50 caracteres</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Precio <span class="text-error">*</span></span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60">$</span>
+            <input
+              type="number"
+              placeholder="0.00"
+              class="input input-bordered pl-8 focus:input-primary"
+              [(ngModel)]="editMaterial.precio"
+              name="editPrecio"
+              required
+              min="0.01"
+              step="0.01"
+              #editPrecioInput="ngModel">
+          </div>
+          <div *ngIf="editPrecioInput.invalid && editPrecioInput.touched" class="label">
+            <span class="label-text-alt text-error">
+              <span *ngIf="editPrecioInput.errors?.['required']">El precio es obligatorio</span>
+              <span *ngIf="editPrecioInput.errors?.['min']">El precio debe ser mayor a 0</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fila 2: Fechas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Fecha de compra <span class="text-error">*</span></span>
+          </label>
+          <input
+            type="date"
+            class="input input-bordered focus:input-primary"
+            [(ngModel)]="editMaterial.fechaCompra"
+            name="editFechaCompra"
+            required
+            [max]="getMaxDate()"
+            #editFechaCompraInput="ngModel">
+          <div *ngIf="editFechaCompraInput.invalid && editFechaCompraInput.touched" class="label">
+            <span class="label-text-alt text-error">
+              <span *ngIf="editFechaCompraInput.errors?.['required']">La fecha de compra es obligatoria</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Fecha de venta</span>
+          </label>
+          <input
+            type="date"
+            class="input input-bordered focus:input-primary"
+            [(ngModel)]="editMaterial.fechaVenta"
+            name="editFechaVenta">
+        </div>
+      </div>
+
+      <!-- Fila 3: Estado y Ciudad -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Estado <span class="text-error">*</span></span>
+          </label>
+          <select
+            class="select select-bordered focus:select-primary"
+            [(ngModel)]="editMaterial.estado"
+            name="editEstado"
+            required
+            #editEstadoInput="ngModel">
+            <option value="" disabled>Seleccionar estado</option>
+            <option *ngFor="let estado of estados" [value]="estado">{{ estado }}</option>
+          </select>
+          <div *ngIf="editEstadoInput.invalid && editEstadoInput.touched" class="label">
+            <span class="label-text-alt text-error">
+              <span *ngIf="editEstadoInput.errors?.['required']">El estado es obligatorio</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Ciudad <span class="text-error">*</span></span>
+          </label>
+          <select
+            class="select select-bordered focus:select-primary"
+            [(ngModel)]="selectedEditCiudadCodigo"
+            name="editCiudad"
+            required
+            #editCiudadInput="ngModel">
+            <option value="" disabled>Seleccionar ciudad</option>
+            <option *ngFor="let ciudad of ciudades" [value]="ciudad.codigo">
+              {{ ciudad.nombre }} - {{ ciudad.departamento.nombre }}
+            </option>
+          </select>
+          <div *ngIf="editCiudadInput.invalid && editCiudadInput.touched" class="label">
+            <span class="label-text-alt text-error">
+              <span *ngIf="editCiudadInput.errors?.['required']">La ciudad es obligatoria</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading y error -->
+      <div *ngIf="updatingMaterial" class="flex items-center justify-center py-4">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <span class="ml-3 text-lg">Actualizando material...</span>
+      </div>
+
+      <div *ngIf="updateError" class="alert alert-error">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>{{ updateError }}</span>
+      </div>
+
+      <!-- Botones -->
+      <div class="modal-action pt-6 border-t border-base-200">
+        <div class="flex gap-3 w-full justify-end">
+          <button type="button" class="btn btn-outline btn-lg" [disabled]="updatingMaterial" (click)="closeEditModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg"
+            [disabled]="editMaterialForm.invalid || updatingMaterial">
+            <span *ngIf="updatingMaterial" class="loading loading-spinner loading-sm mr-2"></span>
+            <svg *ngIf="!updatingMaterial" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            {{ updatingMaterial ? 'Actualizando...' : 'Actualizar Material' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button (click)="closeEditModal()">close</button>
+  </form>
+</dialog>

@@ -31,7 +31,7 @@ public class MaterialService {
     private MaterialMapper materialMapper;
     
     public List<MaterialDTO> findAll() {
-        List<Material> materiales = materialRepository.findAll();
+        List<Material> materiales = materialRepository.findAllOrderedById();
         return materiales.stream()
                 .map(materialMapper::toDTO)
                 .collect(Collectors.toList());
