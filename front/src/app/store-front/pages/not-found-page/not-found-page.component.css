@@ -1,3 +1,38 @@
 :host {
   display: block;
 }
+
+/* Animación personalizada para el número 404 */
+.error-number {
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+}
+
+/* Efecto hover para los botones */
+.btn:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Animación sutil para el icono de error */
+.error-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Efecto hover para los enlaces de ayuda */
+.help-link:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}

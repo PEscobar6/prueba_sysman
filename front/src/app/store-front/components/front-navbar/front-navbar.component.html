@@ -43,6 +43,29 @@
     </ul>
   </div>
   <div class="navbar-end">
-    <a class="btn">Log In</a>
+    <!-- Usuario logueado -->
+    <div *ngIf="isLoggedIn$ | async" class="dropdown dropdown-end">
+      <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+        <div class="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center">
+          <span class="text-sm font-bold">
+            {{ (currentUser$ | async)?.nombreCompleto?.charAt(0) || 'U' }}
+          </span>
+        </div>
+      </div>
+      <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+        <li class="menu-title">
+          <span>{{ (currentUser$ | async)?.nombreCompleto }}</span>
+        </li>
+        <li><a>Perfil</a></li>
+        <li><a>Configuración</a></li>
+        <li><hr></li>
+        <li><a (click)="onLogout()">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+
+    <!-- Botón de login cuando no está logueado -->
+    <button *ngIf="!(isLoggedIn$ | async)" class="btn btn-primary" (click)="onLogin()">
+      Log In
+    </button>
   </div>
 </div>

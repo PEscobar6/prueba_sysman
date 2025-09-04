@@ -28,3 +28,24 @@ INSERT INTO materiales (nombre, descripcion, tipo, precio, fecha_compra, fecha_v
 ('Ladrillos', 'Ladrillos cerámicos rojos', 'CONSTRUCCION', 1200.00, '2024-02-15', NULL, 'DISPONIBLE', 'MED'),
 ('Monitor 24 pulgadas', 'Monitor LED Full HD', 'TECNOLOGIA', 650000.00, '2024-01-25', NULL, 'DISPONIBLE', 'BOG')
 ON CONFLICT DO NOTHING;
+
+-- Insertar usuario de prueba para el sistema de login
+INSERT INTO usuarios (username, email, password, nombre_completo, telefono, estado, fecha_creacion, fecha_modificacion, creado_por) 
+VALUES (
+    'admin', 
+    'admin@sysman.com', 
+    '$2a$10$rFqm5xM.Efr51MA3G31Ut.yPRXIVkTChFc7JicrEzZ3pNdjknKNTq', -- password: "admin123"
+    'Administrador del Sistema',
+    '1234567890',
+    'ACTIVO', 
+    NOW(), 
+    NOW(),
+    'system'
+) ON CONFLICT (username) DO NOTHING;
+
+-- Insertar roles para el usuario admin
+INSERT INTO usuario_roles (usuario_id, rol) 
+SELECT u.id, 'ADMIN' 
+FROM usuarios u 
+WHERE u.username = 'admin' 
+ON CONFLICT DO NOTHING;

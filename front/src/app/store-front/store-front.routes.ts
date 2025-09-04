@@ -4,6 +4,7 @@ import { HomePageComponent } from "./pages/home-page/home-page.component";
 import { MaterialsPageComponent } from "./pages/materials-page/materials-page.component";
 import { MaterialPageComponent } from "./pages/material-page/material-page.component";
 import { NotFoundPageComponent } from "./pages/not-found-page/not-found-page.component";
+import { authGuard } from '../auth/guards/auth.guard';
 
 export const storeFrontRoutes: Routes = [
     {
@@ -16,21 +17,23 @@ export const storeFrontRoutes: Routes = [
           },
           {
             path: 'materials',
-            component: MaterialsPageComponent
+            component: MaterialsPageComponent,
+            canActivate: [authGuard]
           },
           {
             path: 'material/:id',
-            component: MaterialPageComponent
+            component: MaterialPageComponent,
+            canActivate: [authGuard]
           },
           {
-            path: '**',
+            path: 'not-found',
             component: NotFoundPageComponent
           }
         ]
     },
     {
       path: '**',
-      redirectTo: ''
+      redirectTo: '/not-found'
     }
 ];
 
