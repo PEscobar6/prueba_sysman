@@ -1,4 +1,5 @@
-ayudame ahora y por ultimo# Sistema de Gestión de Materiales
+<!-- filepath: c:\Users\Janus\Documents\prueba\sysman\prueba\README.md -->
+# Sistema de Gestión de Materiales
 
 Sistema web completo para la gestión de materiales con autenticación JWT, desarrollado con Spring Boot y Angular.
 
@@ -7,7 +8,7 @@ Sistema web completo para la gestión de materiales con autenticación JWT, desa
 - **Backend**: Spring Boot 3.5.5, Spring Security, JWT, PostgreSQL
 - **Frontend**: Angular 18, TailwindCSS, DaisyUI
 - **Base de datos**: PostgreSQL
-- **Contenedores**: Docker & Docker Compose
+- **Contenedores**: Docker (solo para PostgreSQL)
 
 ## 📋 Requisitos
 
@@ -21,22 +22,9 @@ Sistema web completo para la gestión de materiales con autenticación JWT, desa
 - npm 9+
 - Angular CLI 18+
 
-## 🚀 Instalación y Despliegue
+## 🚀 Instalación y Despliegue Local
 
-### Opción 1: Con Docker (Recomendado)
-
-```bash
-# Clonar el repositorio
-git clone <url-del-repo>
-cd prueba
-
-# Levantar todos los servicios
-docker-compose up --build
-```
-
-### Opción 2: Desarrollo Local
-
-#### 1. Base de Datos PostgreSQL
+### 1. Base de Datos PostgreSQL
 
 **Si tienes PostgreSQL instalado:**
 ```sql
@@ -51,7 +39,16 @@ GRANT ALL PRIVILEGES ON DATABASE materiales_db TO admin;
 docker run --name postgres-db -e POSTGRES_DB=materiales_db -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin123 -p 5432:5432 -d postgres:15
 ```
 
-#### 2. Backend (Puerto 8080)
+### 2. Poblar la Base de Datos
+
+El proyecto incluye un archivo `data.sql` en la raíz que contiene queries de ejemplo para poblar la base de datos con datos de prueba:
+
+```bash
+# Ejecutar el archivo data.sql en PostgreSQL
+psql -h localhost -U admin -d materiales_db -f data.sql
+```
+
+### 3. Backend (Puerto 8080)
 
 ```bash
 cd back
@@ -59,7 +56,7 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-#### 3. Frontend (Puerto 4200)
+### 4. Frontend (Puerto 4200)
 
 ```bash
 cd front
@@ -109,7 +106,8 @@ ng serve
 ├── front/             # Frontend Angular
 │   ├── src/app/       # Código fuente Angular
 │   └── package.json   # Dependencias npm
-├── docker-compose.yml # Configuración Docker
+├── data.sql           # Queries para poblar la base de datos
+├── docker-compose.yml # Solo para PostgreSQL si no está instalado localmente
 └── README.md          # Este archivo
 ```
 
@@ -140,11 +138,11 @@ app.jwtExpirationMs=86400000
 
 ## 📝 Notas de Desarrollo
 
-- El sistema incluye datos de prueba que se cargan automáticamente
+- **Despliegue Local**: Este proyecto está configurado para ejecutarse localmente
+- **Docker**: Solo se usa para PostgreSQL si no tienes la base de datos instalada localmente
+- **Datos de Prueba**: Utiliza el archivo `data.sql` para poblar la base de datos con información inicial
 - Las rutas protegidas requieren autenticación
 - El frontend maneja automáticamente el token JWT
 - Consultar logs en consola para debugging
 
 ---
-
-**Desarrollado con ❤️ para la gestión eficiente de materiales**
