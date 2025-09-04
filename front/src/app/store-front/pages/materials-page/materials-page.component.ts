@@ -18,7 +18,6 @@ export class MaterialsPageComponent implements OnInit {
   loading = false;
   error = '';
 
-  // Filtros
   searchTerm = '';
   selectedTipo = '';
   selectedEstado = '';
@@ -27,7 +26,6 @@ export class MaterialsPageComponent implements OnInit {
   tipos: string[] = [];
   estados = Object.values(EstadoMaterial);
 
-  // Modal properties
   newMaterial: Partial<MaterialDTO> = {};
   editMaterial: Partial<MaterialDTO> = {};
   ciudades: CiudadDTO[] = [];
@@ -51,7 +49,6 @@ export class MaterialsPageComponent implements OnInit {
     this.loadMateriales();
     this.loadCiudades();
 
-    // Verificar si se debe abrir el modal de edición
     this.route.queryParams.subscribe(params => {
       if (params['edit']) {
         const editId = +params['edit'];
@@ -161,7 +158,6 @@ export class MaterialsPageComponent implements OnInit {
     return material.id || index;
   }
 
-  // Métodos para el modal de crear material
   openCreateModal(): void {
     this.initializeNewMaterial();
   }
@@ -320,7 +316,6 @@ export class MaterialsPageComponent implements OnInit {
     }
   }
 
-  // Métodos para el modal de edición
   openEditModal(material: MaterialDTO): void {
     this.editingMaterialId = material.id!;
     this.editMaterial = { ...material };

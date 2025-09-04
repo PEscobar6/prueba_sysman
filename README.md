@@ -1,159 +1,150 @@
-# Sistema de Gestión de Materiales (SysMan)
+ayudame ahora y por ultimo# Sistema de Gestión de Materiales
 
-## Descripción General
-Aplicación full-stack para la gestión de materiales con backend en Spring Boot y frontend en Angular.
+Sistema web completo para la gestión de materiales con autenticación JWT, desarrollado con Spring Boot y Angular.
 
-## Estructura del Proyecto
-```
-├── back/                   # Backend - API REST en Spring Boot
-│   ├── src/
-│   ├── pom.xml
-│   └── README.md
-├── front/                  # Frontend - Aplicación Angular
-│   ├── src/
-│   ├── package.json
-│   └── README.md
-├── docker-compose.yml      # Configuración Docker
-└── README.md              # Este archivo
-```
+## 🛠️ Tecnologías
 
-## Componentes
-
-### Backend (Spring Boot)
-- **Puerto**: 8080
+- **Backend**: Spring Boot 3.5.5, Spring Security, JWT, PostgreSQL
+- **Frontend**: Angular 18, TailwindCSS, DaisyUI
 - **Base de datos**: PostgreSQL
-- **Funcionalidades**:
-  - API RESTful completa para materiales
-  - CRUD de materiales, ciudades y departamentos
-  - Búsquedas avanzadas por tipo, fecha y ciudad
-  - Validaciones de negocio (fechas, campos obligatorios)
-  - Manejo centralizado de excepciones
-  - Respuestas HTTP estandarizadas
+- **Contenedores**: Docker & Docker Compose
 
-### Frontend (Angular)
-- **Puerto**: 4200
-- **Framework**: Angular 18+
-- **Funcionalidades**:
-  - Interfaz de usuario para gestión de materiales
-  - Navegación entre páginas
-  - Integración con API del backend
+## 📋 Requisitos
 
-## Entidades del Sistema
+### Backend
+- Java 17+
+- Maven 3.6+
+- PostgreSQL 12+ (o Docker)
 
-### Material
-- ID (autoincremental)
-- Nombre
-- Descripción
-- Tipo
-- Precio
-- Fecha de compra
-- Fecha de venta (opcional)
-- Estado: ACTIVO | DISPONIBLE | ASIGNADO
-- Ciudad (relación)
+### Frontend
+- Node.js 18+
+- npm 9+
+- Angular CLI 18+
 
-### Ciudad
-- Código (PK)
-- Nombre
-- Departamento (relación)
+## 🚀 Instalación y Despliegue
 
-### Departamento
-- Código (PK)
-- Nombre
+### Opción 1: Con Docker (Recomendado)
 
-## Endpoints Principales
+```bash
+# Clonar el repositorio
+git clone <url-del-repo>
+cd prueba
+
+# Levantar todos los servicios
+docker-compose up --build
+```
+
+### Opción 2: Desarrollo Local
+
+#### 1. Base de Datos PostgreSQL
+
+**Si tienes PostgreSQL instalado:**
+```sql
+-- Crear base de datos
+CREATE DATABASE materiales_db;
+CREATE USER admin WITH PASSWORD 'admin123';
+GRANT ALL PRIVILEGES ON DATABASE materiales_db TO admin;
+```
+
+**Si no tienes PostgreSQL, usar Docker:**
+```bash
+docker run --name postgres-db -e POSTGRES_DB=materiales_db -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin123 -p 5432:5432 -d postgres:15
+```
+
+#### 2. Backend (Puerto 8080)
+
+```bash
+cd back
+mvn clean install
+mvn spring-boot:run
+```
+
+#### 3. Frontend (Puerto 4200)
+
+```bash
+cd front
+npm install
+ng serve
+```
+
+## 🔐 Credenciales de Prueba
+
+- **Usuario**: `admin`
+- **Contraseña**: `admin123`
+
+## 📡 Endpoints del Backend
+
+### Autenticación
+- `POST /api/auth/login` - Iniciar sesión
+- `POST /api/auth/logout` - Cerrar sesión
+- `GET /api/auth/user` - Información del usuario actual
 
 ### Materiales
-- `GET /api/materiales` - Todos los materiales
-- `GET /api/materiales/{id}` - Material por ID
-- `GET /api/materiales/tipo/{tipo}` - Por tipo
-- `GET /api/materiales/fecha-compra/{fecha}` - Por fecha
-- `GET /api/materiales/ciudad/{ciudad}` - Por ciudad
+- `GET /api/materiales` - Listar materiales
+- `GET /api/materiales/{id}` - Obtener material por ID
 - `POST /api/materiales` - Crear material
 - `PUT /api/materiales/{id}` - Actualizar material
 - `DELETE /api/materiales/{id}` - Eliminar material
 
-### Auxiliares
-- `GET /api/ciudades` - Listar ciudades
+### Ubicaciones
 - `GET /api/departamentos` - Listar departamentos
+- `GET /api/ciudades` - Listar ciudades
+- `GET /api/ciudades/departamento/{codigo}` - Ciudades por departamento
 
-## Configuración y Ejecución
+### Pruebas
+- `GET /api/test/hash/{password}` - Generar hash de contraseña
 
-### Requisitos
-- Java 17+
-- Node.js 18+
-- PostgreSQL 12+
-- Docker (opcional)
+## 🌐 URLs de Acceso
 
-### Variables de Entorno
-```env
-DATABASE_URL=jdbc:postgresql://localhost:5432/sysman_db
-DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=password
+- **Frontend**: http://localhost:4200
+- **Backend API**: http://localhost:8080
+- **Base de datos**: localhost:5432
+
+## 📁 Estructura del Proyecto
+
+```
+├── back/              # Backend Spring Boot
+│   ├── src/main/java/ # Código fuente Java
+│   └── pom.xml        # Dependencias Maven
+├── front/             # Frontend Angular
+│   ├── src/app/       # Código fuente Angular
+│   └── package.json   # Dependencias npm
+├── docker-compose.yml # Configuración Docker
+└── README.md          # Este archivo
 ```
 
-### Ejecución con Docker
-```bash
-docker-compose up --build
+## 🏗️ Características
+
+- ✅ Autenticación JWT
+- ✅ Gestión de materiales CRUD
+- ✅ Interfaz responsiva
+- ✅ Validación de formularios
+- ✅ Manejo de errores
+- ✅ Guardias de ruta
+- ✅ Base de datos relacional
+
+## 🔧 Configuración
+
+### Variables de Entorno (Backend)
+
+```properties
+# Base de datos
+DATABASE_URL=jdbc:postgresql://localhost:5432/materiales_db
+DATABASE_USERNAME=admin
+DATABASE_PASSWORD=admin123
+
+# JWT
+app.jwtSecret=your-secret-key
+app.jwtExpirationMs=86400000
 ```
 
-### Ejecución Manual
+## 📝 Notas de Desarrollo
 
-#### Backend
-```bash
-cd back
-mvn spring-boot:run
-```
+- El sistema incluye datos de prueba que se cargan automáticamente
+- Las rutas protegidas requieren autenticación
+- El frontend maneja automáticamente el token JWT
+- Consultar logs en consola para debugging
 
-#### Frontend
-```bash
-cd front
-npm install
-npm start
-```
+---
 
-## Características Técnicas
-
-### Backend
-- **Arquitectura**: Controller → Service → Repository
-- **ORM**: Spring Data JPA
-- **Validaciones**: Bean Validation
-- **Excepciones**: Manejo centralizado
-- **Testing**: JUnit 5
-- **Documentación**: API REST documentada
-
-### Frontend
-- **Componentes**: Modulares y reutilizables
-- **Servicios**: Inyección de dependencias
-- **Routing**: Angular Router
-- **HTTP**: HttpClient para API calls
-- **Estilos**: CSS modular
-
-## Validaciones de Negocio
-- ✅ Fecha de compra ≤ fecha de venta
-- ✅ Campos obligatorios validados
-- ✅ Precios positivos
-- ✅ Estados válidos
-- ✅ Ciudades existentes
-
-## Control de Versiones
-El proyecto está configurado con Git e incluye:
-- `.gitignore` completo para Java y Node.js
-- Estructura modular para colaboración
-- Documentación detallada
-
-## Datos de Prueba
-El sistema incluye datos iniciales:
-- 4 departamentos colombianos
-- 6 ciudades principales
-- 8 materiales de ejemplo
-
-## Próximas Mejoras
-- [ ] Autenticación y autorización
-- [ ] Paginación en listados
-- [ ] Filtros avanzados en frontend
-- [ ] Reportes y estadísticas
-- [ ] API de notificaciones
-- [ ] Pruebas de integración
-
-## Contacto
-Para más información, revisar la documentación específica en cada carpeta (`back/` y `front/`).
+**Desarrollado con ❤️ para la gestión eficiente de materiales**

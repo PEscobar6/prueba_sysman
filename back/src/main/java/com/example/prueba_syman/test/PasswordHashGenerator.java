@@ -19,6 +19,5 @@ public class PasswordHashGenerator {
         // Verificar el hash actual de la BD
         String currentHash = "$2a$10$GRyPPSN3PYrPOBU0kksKbu2SXyQhzNDQDqvXHXX98C5IpqOBLOTdq";
         boolean currentMatches = encoder.matches(rawPassword, currentHash);
-        System.out.println("Current hash verification: " + currentMatches);
     }
 }
